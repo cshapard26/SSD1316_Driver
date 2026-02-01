@@ -22,7 +22,7 @@
 
 
 uint8_t SSD1316_Continuous_Horizontal_Scroll_Setup(bool direction, uint8_t start_page_addr, uint8_t end_page_addr, uint8_t start_col_addr, uint8_t end_col_addr, uint8_t interval);
-uint8_t SSD1316_Continuous_Horizontal_And_Vertical_Scroll_Setup(bool vert_direction, bool horz_direction, bool horz_scroll, uint8_t vert_scroll_offset, uint8_t start_page_addr, uint8_t end_page_addr, uint8_t start_col_addr, uint8_t end_col_addr, uint8_t interval);
+uint8_t SSD1316_Continuous_Horizontal_And_Vertical_Scroll_Setup(bool horz_direction, bool horz_scroll, uint8_t vert_scroll_offset, uint8_t start_page_addr, uint8_t end_page_addr, uint8_t start_col_addr, uint8_t end_col_addr, uint8_t interval);
 uint8_t SSD1316_Set_Scroll_Enable(bool enabled);
 uint8_t SSD1316_Set_Vertical_Scroll_Area(uint8_t fixed_area, uint8_t num_scroll_rows);
 uint8_t SSD1316_Content_Scroll_Setup(bool direction, uint8_t start_page_addr, uint8_t end_page_addr, uint8_t start_col_addr, uint8_t end_col_addr);
