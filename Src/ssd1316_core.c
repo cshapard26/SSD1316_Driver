@@ -18,8 +18,7 @@ I2C_HandleTypeDef hi2c;
 GPIO_TypeDef* RES_Port;
 uint16_t RES_Pin;
 
-
-static char buffer[SSD1316_PAGE_COUNT][SSD1316_COL_COUNT];
+char buffer[SSD1316_PAGE_COUNT][SSD1316_COL_COUNT];
 
 
 
@@ -143,20 +142,17 @@ void SSD1316_Set_Cursor_Position(uint8_t x, uint8_t y) {
 
 
 uint8_t SSD1316_Update_Screen() {
-	uint8_t display_bytes[SSD1316_COL_COUNT * SSD1316_PAGE_COUNT];
-
-	for (uint8_t page = 0; page < SSD1316_PAGE_COUNT; page++) {
-		memcpy(display_bytes + (page * SSD1316_COL_COUNT), buffer[page], SSD1316_COL_COUNT);
-	}
-
 	uint8_t col_data[2]= {0x00, 0x7F};
 	_SSD1316_Send_Command(SSD1316_SET_COL_ADDR_VH_MODE, col_data, 2);	// Col position 0
 
 	uint8_t page_data[2]= {0x00, 0x04};
 	 _SSD1316_Send_Command(SSD1316_SET_PAGE_ADDR_VH_MODE, page_data, 2); // Row position 0
 
-	 for (uint16_t idx = 0; idx < sizeof(display_bytes); idx++) {
-		 _SSD1316_Write_Byte(display_bytes[idx]);
+
+	 for (uint8_t page = 0; page < SSD1316_PAGE_COUNT; page++) {
+		 for (uint8_t col = 0; col < SSD1316_COL_COUNT; col++) {
+			 _SSD1316_Write_Byte(buffer[page][col]);
+		 }
 	 }
 
 	 return 0;
@@ -186,19 +182,19 @@ uint8_t SSD1316_Write_Character(char value, bool append) {
 	uint8_t data_top[CHARS_COLS_LENGTH];
 	uint8_t data_bottom[CHARS_COLS_LENGTH];
 	for (uint8_t i = 0; i < CHARS_COLS_LENGTH; i++) {
-		data_top[i] = FONTS[value - 0x20][i] >> (cursor_y % 8);
-		data_bottom[i] = FONTS[value - 0x20][i] << (8 - (cursor_y % 8));
+		data_bottom[i] = FONTS[value - 0x20][i] << (cursor_y % 8);
+		data_top[i] = FONTS[value - 0x20][i] >> (8 - (cursor_y % 8));
 	}
 
 	bool single_page = (cursor_y % 8) == 0;
 
 	for (uint8_t i = 0; i < CHARS_COLS_LENGTH; i++) {
 		if (append) {
-			buffer[cursor_y / 8][cursor_x + i] |= data_bottom[i];
-			if (!single_page) buffer[(cursor_y / 8) + 1][cursor_x + i] |= data_top[i];
+			if (!single_page)buffer[cursor_y / 8 + 1][cursor_x + i] |= data_top[i];
+			buffer[(cursor_y / 8)][cursor_x + i] |= data_bottom[i];
 		} else {
-			buffer[cursor_y / 8][cursor_x + i] = data_bottom[i];
 			if (!single_page) buffer[(cursor_y / 8) + 1][cursor_x + i] = data_top[i];
+			buffer[cursor_y / 8][cursor_x + i] = data_bottom[i];
 		}
 	}
 
@@ -209,7 +205,7 @@ uint8_t SSD1316_Write_Character(char value, bool append) {
 uint8_t SSD1316_Write_String(char* string, bool wrap, bool append) {
 	uint8_t orig_x = cursor_x;
 
-	for (uint8_t len = 0; len < sizeof(string); len++) {
+	for (uint8_t len = 0; len < strlen(string); len++) {
 		uint8_t status = SSD1316_Write_Character(string[len], append);
 		if (status == 2) return 2;
 		if (status == 1) {
