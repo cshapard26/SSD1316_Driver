@@ -44,6 +44,7 @@
 #define SSD1316_NOP		0xE3
 
 
+extern char buffer[SSD1316_PAGE_COUNT][SSD1316_COL_COUNT];
 
 void SSD1316_Set_I2C_And_Reset_Ports(I2C_HandleTypeDef hi2c1, GPIO_TypeDef* GPIO_P, uint16_t GPIO_Pin1);
 
